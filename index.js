@@ -25,6 +25,11 @@ async function run(){
 
         app.get('/main', async(req, res)=> {
             res.send('hello main page');
+        });
+
+
+        app.get('/try', async(req, res)=> {
+            res.send('try demo');
         })
     }
     finally{}
