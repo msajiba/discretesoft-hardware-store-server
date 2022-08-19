@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -20,17 +20,35 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
 
     try{
-        await client.connect();
-        const toolsCollection = client.db('hardware').collection('tool');
 
-        app.get('/main', async(req, res)=> {
-            res.send('hello main page');
+        await client.connect();
+        const toolsCollection = client.db('hardware').collection('tools');
+        const orderCollection = client.db('hardware').collection('order');
+
+        //==> GET ALL TOOLS 
+        app.get('/services', async(req, res)=> {
+            const filter = {};
+            const result = await toolsCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        //==> GET specific service by id
+        app.get('/service/:id', async(req, res)=> {
+            const id = req.params.id;
+            const filter = {_id:ObjectId(id)};
+            const result = await toolsCollection.findOne(filter);
+            res.send(result);
         });
 
 
-        app.get('/try', async(req, res)=> {
-            res.send('try demo');
-        })
+        //==> POST ORDER
+        app.post('/order', async(req, res)=> {
+            const orderInfo = req.body;
+            console.log(orderInfo);
+            const result = await orderCollection.insertOne(orderInfo);
+            res.send(result);
+        });
+
     }
     finally{}
 
