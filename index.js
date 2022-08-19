@@ -49,6 +49,22 @@ async function run(){
             res.send(result);
         });
 
+        //==> GET ALL USER BASE ORDER
+        app.get('/order', async(req, res)=> {
+            const email = req.query.email;
+            const filter = {email: email};
+            const result = await orderCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        app.delete('/order/:id', async(req, res)=> {
+            const id = req.params.id;
+            console.log(id);
+            const filter = {_id: ObjectId(id)}
+            const result = await orderCollection.deleteOne(filter);
+            res.send(result);
+        });
+
     }
     finally{}
 
