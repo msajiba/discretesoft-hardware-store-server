@@ -24,15 +24,22 @@ async function run(){
         await client.connect();
         const toolsCollection = client.db('hardware').collection('tools');
         const orderCollection = client.db('hardware').collection('order');
+        const reviewCollection = client.db('hardware').collection('review');
+        const userCollection = client.db('hardware').collection('user');
+        const profileCollection = client.db('hardware').collection('profile');
 
-        //==> GET ALL TOOLS 
+
+
+    // ======================> TOOLS STAT <========================
+
+        //----> GET ALL TOOLS 
         app.get('/services', async(req, res)=> {
             const filter = {};
             const result = await toolsCollection.find(filter).toArray();
             res.send(result);
         });
 
-        //==> GET specific service by id
+        //----> specific tool by id
         app.get('/service/:id', async(req, res)=> {
             const id = req.params.id;
             const filter = {_id:ObjectId(id)};
@@ -40,6 +47,13 @@ async function run(){
             res.send(result);
         });
 
+
+    // ======================> TOOLS END <========================
+
+
+
+
+    // ======================> ORDER START <========================
 
         //==> POST ORDER
         app.post('/order', async(req, res)=> {
@@ -49,7 +63,7 @@ async function run(){
             res.send(result);
         });
 
-        //==> GET ALL USER BASE ORDER
+        //==> GET ALL ORDER FOR USER
         app.get('/order', async(req, res)=> {
             const email = req.query.email;
             const filter = {email: email};
@@ -57,6 +71,7 @@ async function run(){
             res.send(result);
         });
 
+        //=> GET ORDER BY USER
         app.delete('/order/:id', async(req, res)=> {
             const id = req.params.id;
             console.log(id);
@@ -65,12 +80,93 @@ async function run(){
             res.send(result);
         });
 
+    // ======================> ORDER END <========================
+
+
+
+
+
+
+    // ======================> REVIEW START <========================
+
+        //==> POST REVIEW
+        app.post('/review', async(req, res)=> {
+            const reviewInfo = req.body;
+            const result = await reviewCollection.insertOne(reviewInfo);
+            res.send(result);
+        });
+
+        //==> GET REVIEW
+        app.get('/review', async(req, res)=> {
+            const result = await reviewCollection.find().toArray();
+            res.send(result);
+        });
+
+
+
+    // ======================> REVIEW END <========================
+
+
+    // ======================> USER START <========================
+
+        //==> CREATE USER BY LOGIN AND REGISTER
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+              $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({result, token});
+        });
+
+         //==> GET ADMIN
+        app.get('/admin/:email', async (req, res)=> {
+            const email = req.params.email;
+            const filter = {email: email};
+            const user = await userCollection.findOne(filter);
+            const isAdmin = user?.role === 'admin';
+            res.send(isAdmin);
+        });
+
+    // ======================> USER END <========================
+
+
+    // ======================> PROFILE START <========================
+
+        //==> POST PROFILE
+        app.put('/profile/:email', async(req, res)=> {
+            const email = req.params.email;
+            const profileInfo = req.body;
+            const filter = {email: email};
+            const options = { upsert: true};
+            const updateDoc= {
+                $set: profileInfo,
+            };
+            const result = await profileCollection.updateOne(filter, updateDoc, options);
+            res.send(result); 
+        });
+
+        //==> GET PROFILE_INFO
+        app.get('/profile/:email', async (req, res)=> {
+            const email = req.params.email;
+            const filter = {email: email};
+            const result = await profileCollection.findOne(filter);
+            res.send(result);
+        });
+
+
+    // ======================> PROFILE END <========================
+
     }
+
     finally{}
 
 }
 run().catch(console.dir);
-
 
 
 
