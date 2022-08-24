@@ -132,6 +132,19 @@ async function run(){
 
         }); 
 
+        //==> PAYMENT ORDER STATUS 
+        
+        app.patch('/payment-complete/:id', verifyJWT, async (req, res)=> {
+            const id = req.params.id;
+            const filter ={ _id: ObjectId(id)};
+            const updateDoc = {
+                $set: {
+                    status: true,
+                },
+            };
+            const updatePayment = await orderCollection.updateOne(filter, updateDoc);
+            res.send(updatePayment);
+        }); 
 
 
         //==> GET A ORDER FOR PAYMENT
@@ -153,6 +166,14 @@ async function run(){
 
         //=> DELETE ORDER BY USER
         app.delete('/order/:id', verifyJWT, async(req, res)=> {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const result = await orderCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        //==> DELETE ORDER BY ADMIN 
+        app.delete('/admin/order/:id', verifyJWT, verifyAdmin, async(req, res)=> {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)}
             const result = await orderCollection.deleteOne(filter);
