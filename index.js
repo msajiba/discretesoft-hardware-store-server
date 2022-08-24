@@ -153,7 +153,7 @@ async function run(){
             const filter = {_id: ObjectId(id)}
             const result = await orderCollection.findOne(filter);
             res.send(result);
-        })
+        });
 
         //==> GET ALL ORDER FOR USER
         app.get('/order/:email', verifyJWT, async(req, res)=> {
@@ -198,9 +198,6 @@ async function run(){
 
 
     // ======================> ORDER END <========================
-
-
-
 
 
 
